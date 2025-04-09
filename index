@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hair Harmony - Hair Care + Chatbot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f7f6;
+      color: #333;
+    }
+    header {
+      background: linear-gradient(to right, #56ab2f, #a8e063);
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5em;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    section {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+
+    select, button, input[type="text"] {
+      padding: 12px 15px;
+      margin: 10px 0;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #56ab2f;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #4a9a2a;
+    }
+
+    #clearButton {
+      background-color: #f0f0f0;
+      color: #555;
+      border: 1px solid #ccc;
+    }
+
+    #clearButton:hover {
+      background-color: #e0e0e0;
+    }
+
+    .suggestion-card {
+      background: #fff;
+      border-left: 5px solid #a8e063;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      animation: fadeIn 0.5s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #chatWindow {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .typing-indicator {
+      font-style: italic;
+      color: #56ab2f;
+    }
+
+    .typing-dots::after {
+      content: ' .';
+      animation: dots 1s steps(3, end) infinite;
+    }
+
+    @keyframes dots {
+      0% { content: ' .'; }
+      33% { content: ' ..'; }
+      66% { content: ' ...'; }
+      100% { content: ' .'; }
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.9em;
+      color: #888;
+      padding: 20px;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 2em; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hair Harmony</h1>
+    <p>Get personalized hair care suggestions and chat with our hair bot!</p>
+  </header>
+
+  <main>
+    <!-- Hair Form Section -->
+    <section>
+      <h2>Personalized Hair Suggestions</h2>
+      <form id="hairForm">
+        <label for="hairType">Hair Type:</label>
+        <select id="hairType" required>
+          <option value="">-- Select Hair Type --</option>
+          <option value="straight">Straight</option>
+          <option value="wavy">Wavy</option>
+          <option value="curly">Curly</option>
+          <option value="coily">Coily</option>
+        </select>
+
+        <label for="scalpType">Scalp Type:</label>
+        <select id="scalpType" required>
+          <option value="">-- Select Scalp Type --</option>
+          <option value="dry">Dry</option>
+          <option value="oily">Oily</option>
+          <option value="normal">Normal</option>
+          <option value="sensitive">Sensitive</option>
+        </select>
+
+        <label for="hairGoal">Hair Goal:</label>
+        <select id="hairGoal" required>
+          <option value="">-- Select Hair Goal --</option>
+          <option value="growth">Growth</option>
+          <option value="hydration">Hydration</option>
+          <option value="volume">Volume</option>
+          <option value="repair">Repair</option>
+        </select>
+
+        <button type="submit">Get Suggestions</button>
+        <button type="button" id="clearButton">Clear</button>
+      </form>
+      <div id="loading" style="display:none; margin-top: 15px; font-weight: bold; color: #56ab2f;">Loading suggestions...</div>
+      <div id="suggestions" style="margin-top: 20px;"></div>
+    </section>
+
+    <!-- Chatbot Section -->
+    <section>
+      <h2>Chat with HairBot 💬</h2>
+      <div id="chatWindow">
+        <div><strong>Bot:</strong> Hi there! Ask me anything about hair care like dryness, frizz, volume, or growth!</div>
+      </div>
+      <input type="text" id="userInput" placeholder="Type your question..." />
+      <button id="sendBtn">Send</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Hair Harmony. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Hair Form Logic
+    document.getElementById("hairForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const hairType = document.getElementById("hairType").value;
+      const scalpType = document.getElementById("scalpType").value;
+      const hairGoal = document.getElementById("hairGoal").value;
+      const suggestionsDiv = document.getElementById("suggestions");
+      const loading = document.getElementById("loading");
+
+      suggestionsDiv.innerHTML = "";
+      loading.style.display = "block";
+
+      setTimeout(() => {
+        loading.style.display = "none";
+        const tips = [
+          `For ${hairType} hair with a ${scalpType} scalp aiming for ${hairGoal}, use a sulfate-free shampoo.`,
+          `Use a deep conditioning treatment weekly tailored to ${hairType} textures.`,
+          `Avoid heat styling tools if you have a ${scalpType} scalp.`,
+          `Try serums or oils rich in argan or jojoba for better ${hairGoal} results.`
+        ];
+        tips.forEach(tip => {
+          const card = document.createElement("div");
+          card.className = "suggestion-card";
+          card.innerText = tip;
+          suggestionsDiv.appendChild(card);
+        });
+      }, 1000);
+    });
+
+    document.getElementById("clearButton").addEventListener("click", function() {
+      document.getElementById("hairForm").reset();
+      document.getElementById("suggestions").innerHTML = "";
+    });
+
+    // Chatbot Logic
+    const chatWindow = document.getElementById("chatWindow");
+    const input = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    function scrollToBottom() {
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function getBotResponse(message) {
+      if (message.includes("dry")) {
+        return "Try hydrating shampoos with aloe vera or coconut oil.";
+      } else if (message.includes("frizz")) {
+        return "Use anti-frizz serum and avoid harsh towels.";
+      } else if (message.includes("growth")) {
+        return "Scalp massage and a good diet can support hair growth!";
+      } else if (message.includes("volume")) {
+        return "Blow-dry upside down and try volumizing products.";
+      } else {
+        return "Try asking me about dryness, frizz, growth, or volume!";
+      }
+    }
+
+    function sendMessage() {
+      const userText = input.value.trim();
+      if (userText === "") return;
+
+      const userDiv = document.createElement("div");
+      userDiv.innerHTML = `<strong>You:</strong> ${userText}`;
+      chatWindow.appendChild(userDiv);
+      input.value = "";
+      scrollToBottom();
+
+      const typingDiv = document.createElement("div");
+      typingDiv.className = "typing-indicator typing-dots";
+      typingDiv.innerHTML = "<strong>Bot is typing</strong>";
+      chatWindow.appendChild(typingDiv);
+      scrollToBottom();
+
+      setTimeout(() => {
+        typingDiv.remove();
+        const reply = getBotResponse(userText.toLowerCase());
+        const botDiv = document.createElement("div");
+        botDiv.innerHTML = `<div style="color:#56ab2f;"><strong>Bot:</strong> ${reply}</div>`;
+        chatWindow.appendChild(botDiv);
+        scrollToBottom();
+      }, 1500);
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
